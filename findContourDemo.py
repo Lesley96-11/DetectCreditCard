@@ -19,12 +19,37 @@ image = cv2.imread("D:\\NetVirtaChanllengeProject\\test5.jpg")
 image = imutils.resize(image, height = 500)
 image = cv2.resize(image, (0, 0), fx = 0.5, fy = 0.5)
 
+#substract background
+def fill_color_demo(image):
+    copyIma = image.copy()
+    h, w = image.shape[:2]
+    print(h, w)
+    mask = np.zeros([h+2, w+2], np.uint8)
+    cv.floodFill(copyIma, mask, (20, 20), (0, 0, 0), (50, 50, 50), (50, 50, 50), cv.FLOODFILL_FIXED_RANGE)  
+    return copyIma
+image_blurred = cv2.medianBlur(image, 5)#pyrMeanShiftFiltering(image, 25, 10)pyrMeanShiftFiltering(image, 25, 10)#GaussianBlur(image, (9, 9),0)#cv2.medianBlur(image, 5)
+image_water = fill_color_demo(image_blurred)
+cv2.imshow("filter", image_blurred)
+cv2.imshow("fill_color", image_water)
+
 # convert the image to grayscale, blur it, and find edges
 # in the image
-gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-image1 = cv2.GaussianBlur(image, (7 , 7), 0)
+gray = cv2.cvtColor(image_water, cv2.COLOR_BGR2GRAY)
+cv2.imshow('gray', gray)
+def stretch(img):
+    max_ = float(img.max())
+    min_ = float(img.min())
+ 
+    for i in range(img.shape[0]):
+        for j in range(img.shape[1]):
+            img[i, j] = (255 / (max_ - min_)) * img[i, j] - (255 * min_) / (max_ - min_)
+    return img
+stretchedimg = stretch(gray)
+cv2.imshow('stretchedimg', stretchedimg)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
 ## edge detection
-edges = cv2.Canny(image1, 50, 150, apertureSize=3)
+edges = cv2.Canny(stretchedimg, 50, 150, apertureSize=3)
 #
 ## dilate
 closed = cv2.dilate(edges, None, iterations = 4)
